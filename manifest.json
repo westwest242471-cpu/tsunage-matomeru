@@ -1,0 +1,19 @@
+{
+  "name": "つなげてまとめ - チャット画像結合",
+  "short_name": "つなげてまとめ",
+  "description": "スクリーンショットを上から下へ順番に連結して1枚の画像にするアプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F0F2F5",
+  "theme_color": "#364FC7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

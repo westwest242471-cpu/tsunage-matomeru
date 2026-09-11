@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>つなげてまとめ</title>
+<meta name="theme-color" content="#364FC7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root{
+    --bg:#F0F2F5;
+    --surface:#FFFFFF;
+    --ink:#1A1D23;
+    --muted:#667085;
+    --border:#D7DCE1;
+    --accent:#364FC7;
+    --accent-ink:#FFFFFF;
+    --success:#2F9E63;
+    --danger:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Segoe UI",Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:96px;
+  }
+  header{
+    padding:20px 20px 8px;
+  }
+  h1{
+    font-size:20px;
+    font-weight:700;
+    margin:0 0 2px;
+    letter-spacing:0.01em;
+  }
+  header p{
+    margin:0;
+    font-size:13px;
+    color:var(--muted);
+  }
+  main{
+    padding:12px 16px 24px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .picker{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:14px;
+    margin-top:8px;
+    border:1.5px dashed var(--border);
+    border-radius:14px;
+    background:var(--surface);
+    color:var(--accent);
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .picker input{display:none;}
+  #list{
+    list-style:none;
+    margin:18px 0 0;
+    padding:0;
+  }
+  .item{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    margin-bottom:0;
+    touch-action:pan-y;
+  }
+  .item.dragging{
+    opacity:0.4;
+  }
+  .connector{
+    display:flex;
+    justify-content:center;
+    height:16px;
+  }
+  .connector::before{
+    content:"";
+    width:0;
+    border-left:2px dashed var(--border);
+  }
+  .badge{
+    flex:none;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    background:var(--accent);
+    color:var(--accent-ink);
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .thumb{
+    flex:none;
+    width:52px;
+    height:52px;
+    border-radius:8px;
+    object-fit:cover;
+    background:#EEE;
+    border:1px solid var(--border);
+  }
+  .meta{
+    flex:1;
+    min-width:0;
+  }
+  .meta .name{
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .meta .dim{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .remove{
+    flex:none;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .handle{
+    flex:none;
+    width:30px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    cursor:grab;
+    font-size:18px;
+    letter-spacing:2px;
+    touch-action:none;
+  }
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:28px 12px;
+  }
+  .bottombar{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--bg) 60%, transparent);
+  }
+  .bottombar-inner{
+    max-width:520px;
+    margin:0 auto;
+    display:flex;
+    gap:10px;
+  }
+  button.primary{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:var(--accent);
+    color:var(--accent-ink);
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.primary:disabled{
+    background:#9AA5C0;
+    cursor:not-allowed;
+  }
+  .result{
+    margin-top:22px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px;
+  }
+  .result h2{
+    font-size:14px;
+    margin:0 0 10px;
+  }
+  .result img{
+    width:100%;
+    display:block;
+    border-radius:8px;
+    border:1px solid var(--border);
+  }
+  a.download{
+    display:block;
+    text-align:center;
+    margin-top:12px;
+    padding:12px;
+    border-radius:12px;
+    background:var(--success);
+    color:#fff;
+    font-weight:700;
+    text-decoration:none;
+    font-size:14px;
+  }
+  .status{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+    min-height:16px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>つなげてまとめ</h1>
+  <p>チャットのスクリーンショットを上から下へ連結して1枚にします</p>
+</header>
+
+<main>
+  <label class="picker">
+    画像を選ぶ(複数選択可)
+    <input id="fileInput" type="file" accept="image/*" multiple>
+  </label>
+
+  <ul id="list"></ul>
+  <p id="emptyMsg" class="empty">まだ画像がありません。上のボタンから追加してください。</p>
+
+  <div id="resultBox" class="result" style="display:none;">
+    <h2>結合結果</h2>
+    <img id="resultImg" alt="結合された画像">
+    <a id="downloadLink" class="download" download="combined.png">画像を保存する</a>
+  </div>
+</main>
+
+<div class="bottombar">
+  <div class="bottombar-inner">
+    <button id="combineBtn" class="primary" disabled>この順番で結合する</button>
+  </div>
+  <div class="status" id="statusMsg" style="text-align:center;"></div>
+</div>
+
+<script>
+(function(){
+  const fileInput = document.getElementById('fileInput');
+  const list = document.getElementById('list');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const combineBtn = document.getElementById('combineBtn');
+  const resultBox = document.getElementById('resultBox');
+  const resultImg = document.getElementById('resultImg');
+  const downloadLink = document.getElementById('downloadLink');
+  const statusMsg = document.getElementById('statusMsg');
+
+  /** @type {{id:number, file:File, url:string, width:number, height:number}[]} */
+  let items = [];
+  let nextId = 1;
+
+  fileInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const file of files) {
+      const url = URL.createObjectURL(file);
+      const dim = await loadDimensions(url);
+      items.push({ id: nextId++, file, url, width: dim.width, height: dim.height });
+    }
+    fileInput.value = '';
+    render();
+  });
+
+  function loadDimensions(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => resolve({ width: 0, height: 0 });
+      img.src = url;
+    });
+  }
+
+  function render() {
+    list.innerHTML = '';
+    emptyMsg.style.display = items.length ? 'none' : 'block';
+    combineBtn.disabled = items.length < 2;
+
+    items.forEach((item, index) => {
+      if (index > 0) {
+        const connector = document.createElement('li');
+        connector.className = 'connector';
+        connector.setAttribute('aria-hidden', 'true');
+        list.appendChild(connector);
+      }
+      const li = document.createElement('li');
+      li.className = 'item';
+      li.dataset.id = item.id;
+
+      li.innerHTML = `
+        <span class="handle" data-role="handle">⠿</span>
+        <span class="badge">${index + 1}</span>
+        <img class="thumb" src="${item.url}" alt="">
+        <span class="meta">
+          <div class="name">${escapeHtml(item.file.name)}</div>
+          <div class="dim">${item.width}×${item.height}px</div>
+        </span>
+        <button class="remove" data-role="remove" aria-label="削除">✕</button>
+      `;
+      list.appendChild(li);
+    });
+
+    attachDrag();
+    attachRemove();
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function attachRemove() {
+    list.querySelectorAll('[data-role="remove"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const li = btn.closest('.item');
+        const id = Number(li.dataset.id);
+        items = items.filter((it) => it.id !== id);
+        render();
+      });
+    });
+  }
+
+  // --- ポインタ操作によるドラッグ並び替え(マウス・タッチ両対応) ---
+  let dragEl = null;
+  let dragId = null;
+  let placeholderIndex = null;
+
+  function attachDrag() {
+    list.querySelectorAll('[data-role="handle"]').forEach((handle) => {
+      handle.addEventListener('pointerdown', onPointerDown);
+    });
+  }
+
+  function onPointerDown(e) {
+    const li = e.target.closest('.item');
+    if (!li) return;
+    e.preventDefault();
+    dragEl = li;
+    dragId = Number(li.dataset.id);
+    dragEl.classList.add('dragging');
+    dragEl.setPointerCapture && e.target.setPointerCapture(e.pointerId);
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp, { once: true });
+  }
+
+  function onPointerMove(e) {
+    if (!dragEl) return;
+    const els = Array.from(list.querySelectorAll('.item')).filter((el) => el !== dragEl);
+    let targetIndex = items.findIndex((it) => it.id === dragId);
+
+    for (const el of els) {
+      const rect = el.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      const elId = Number(el.dataset.id);
+      const elIndex = items.findIndex((it) => it.id === elId);
+      if (e.clientY < midY && e.clientY > rect.top - rect.height / 2) {
+        targetIndex = elIndex;
+        break;
+      }
+    }
+
+    const currentIndex = items.findIndex((it) => it.id === dragId);
+    if (targetIndex !== currentIndex && targetIndex >= 0) {
+      const [moved] = items.splice(currentIndex, 1);
+      items.splice(targetIndex, 0, moved);
+      render();
+      // 再描画後、ドラッグ状態を復元
+      const newEl = list.querySelector(`.item[data-id="${dragId}"]`);
+      if (newEl) {
+        dragEl = newEl;
+        dragEl.classList.add('dragging');
+      }
+    }
+  }
+
+  function onPointerUp() {
+    window.removeEventListener('pointermove', onPointerMove);
+    if (dragEl) dragEl.classList.remove('dragging');
+    dragEl = null;
+    dragId = null;
+  }
+
+  // --- 画像結合 ---
+  combineBtn.addEventListener('click', async () => {
+    if (items.length < 2) return;
+    statusMsg.textContent = '結合中…';
+    combineBtn.disabled = true;
+
+    try {
+      const imgs = await Promise.all(items.map((it) => loadImageEl(it.url)));
+      const maxWidth = Math.max(...imgs.map((img) => img.naturalWidth));
+      const totalHeight = imgs.reduce((sum, img) => sum + img.naturalHeight, 0);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = maxWidth;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, maxWidth, totalHeight);
+
+      let y = 0;
+      for (const img of imgs) {
+        const x = Math.round((maxWidth - img.naturalWidth) / 2);
+        ctx.drawImage(img, x, y);
+        y += img.naturalHeight;
+      }
+
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        resultImg.src = url;
+        downloadLink.href = url;
+        const ts = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        downloadLink.download = `combined_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.png`;
+        resultBox.style.display = 'block';
+        resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        statusMsg.textContent = '完了しました';
+      }, 'image/png');
+    } catch (err) {
+      statusMsg.textContent = 'エラーが発生しました: ' + err.message;
+    } finally {
+      combineBtn.disabled = items.length < 2;
+    }
+  });
+
+  function loadImageEl(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  render();
+
+  // --- PWA登録 ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
