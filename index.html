@@ -43,9 +43,7 @@
     font-size:15px; font-weight:600; cursor:pointer;
   }
   .picker input{display:none;}
-  .clear-all{
-    width:100%; margin-top:8px;
-  }
+  .clear-all{ width:100%; margin-top:8px; }
   .clear-all:disabled{ opacity:0.4; cursor:not-allowed; }
   #list{ list-style:none; margin:18px 0 0; padding:0; }
   .item{
@@ -83,6 +81,19 @@
     color:var(--muted); cursor:grab; font-size:18px; letter-spacing:2px; touch-action:none;
   }
   .empty{ text-align:center; color:var(--muted); font-size:13px; padding:28px 12px; }
+
+  .settings-row{
+    display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:12px 14px; margin-top:14px;
+  }
+  .settings-field{ display:flex; flex-direction:column; gap:5px; font-size:13px; flex:1; min-width:120px; }
+  .settings-field label{ color:var(--muted); font-size:12px; }
+  .settings-field select{
+    padding:8px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:13px;
+  }
+  .settings-field input[type="range"]{ accent-color:var(--accent); width:100%; }
+
   .bottombar{
     position:fixed; left:0;right:0;bottom:0;
     padding:12px 16px calc(12px + env(safe-area-inset-bottom));
@@ -103,10 +114,12 @@
   .result{ margin-top:22px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; }
   .result h2{ font-size:14px; margin:0 0 10px; }
   .result img{ width:100%; display:block; border-radius:8px; border:1px solid var(--border); }
+  .result-actions{ display:flex; gap:10px; margin-top:12px; }
   a.download{
-    display:block; text-align:center; margin-top:12px; padding:12px; border-radius:12px;
+    flex:1; display:block; text-align:center; padding:12px; border-radius:12px;
     background:var(--success); color:#fff; font-weight:700; text-decoration:none; font-size:14px;
   }
+  button.share-btn{ flex:1; }
   .status{ font-size:12px; color:var(--muted); margin-top:6px; min-height:16px; }
 
   /* --- トリミングモーダル --- */
@@ -160,10 +173,27 @@
   <ul id="list"></ul>
   <p id="emptyMsg" class="empty">まだ画像がありません。上のボタンから追加してください。</p>
 
+  <div class="settings-row">
+    <div class="settings-field">
+      <label for="formatSelect">保存形式</label>
+      <select id="formatSelect">
+        <option value="image/png">PNG(高画質・容量大)</option>
+        <option value="image/jpeg">JPEG(軽量)</option>
+      </select>
+    </div>
+    <div class="settings-field" id="qualityField" style="display:none;">
+      <label for="qualityRange">画質(<span id="qualityValue">85</span>%)</label>
+      <input type="range" id="qualityRange" min="50" max="100" step="5" value="85">
+    </div>
+  </div>
+
   <div id="resultBox" class="result" style="display:none;">
     <h2>結合結果</h2>
     <img id="resultImg" alt="結合された画像">
-    <a id="downloadLink" class="download" download="combined.png">画像を保存する</a>
+    <div class="result-actions">
+      <a id="downloadLink" class="download" download="combined.png">画像を保存する</a>
+      <button id="shareBtn" class="ghost share-btn" style="display:none;">共有する</button>
+    </div>
   </div>
 </main>
 
@@ -203,10 +233,14 @@
   const resultBox = document.getElementById('resultBox');
   const resultImg = document.getElementById('resultImg');
   const downloadLink = document.getElementById('downloadLink');
+  const shareBtn = document.getElementById('shareBtn');
   const statusMsg = document.getElementById('statusMsg');
+  const formatSelect = document.getElementById('formatSelect');
+  const qualityField = document.getElementById('qualityField');
+  const qualityRange = document.getElementById('qualityRange');
+  const qualityValue = document.getElementById('qualityValue');
 
   const cropModal = document.getElementById('cropModal');
-  const cropStage = document.getElementById('cropStage');
   const cropImg = document.getElementById('cropImg');
   const cropRectEl = document.getElementById('cropRect');
   const cropReset = document.getElementById('cropReset');
@@ -219,6 +253,94 @@
   let items = [];
   let nextId = 1;
 
+  // ================= IndexedDBによる状態の自動保存/復元 =================
+  const DB_NAME = 'tsunagete-matome-db';
+  const STORE_NAME = 'session';
+
+  function openDb() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) { reject(new Error('no indexeddb')); return; }
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore(STORE_NAME); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function txDone(tx) {
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function saveState() {
+    try {
+      const db = await openDb();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const record = {
+        items: items.map((it, idx) => ({
+          id: it.id,
+          order: idx,
+          blob: it.file,
+          fileName: it.file.name,
+          naturalWidth: it.naturalWidth,
+          naturalHeight: it.naturalHeight,
+          crop: it.crop
+        })),
+        format: formatSelect.value,
+        quality: qualityRange.value
+      };
+      tx.objectStore(STORE_NAME).put(record, 'current');
+      await txDone(tx);
+    } catch (e) { /* 保存できなくても致命的ではないので無視 */ }
+  }
+
+  async function clearState() {
+    try {
+      const db = await openDb();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete('current');
+      await txDone(tx);
+    } catch (e) { /* 無視 */ }
+  }
+
+  async function loadState() {
+    try {
+      const db = await openDb();
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const record = await new Promise((resolve, reject) => {
+        const req = tx.objectStore(STORE_NAME).get('current');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      if (!record || !record.items || !record.items.length) return;
+
+      const sorted = record.items.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      for (const saved of sorted) {
+        const blob = saved.blob;
+        if (!blob) continue;
+        const url = URL.createObjectURL(blob);
+        const imgEl = await loadImageEl(url);
+        const file = blob instanceof File ? blob : new File([blob], saved.fileName || 'image.png', { type: blob.type });
+        items.push({
+          id: nextId++,
+          file,
+          url,
+          imgEl,
+          naturalWidth: saved.naturalWidth || imgEl.naturalWidth,
+          naturalHeight: saved.naturalHeight || imgEl.naturalHeight,
+          crop: saved.crop || null,
+          thumbSrc: url
+        });
+        if (saved.crop) updateThumb(items[items.length - 1]);
+      }
+      if (record.format) formatSelect.value = record.format;
+      if (record.quality) qualityRange.value = record.quality;
+    } catch (e) { /* 復元できなくても致命的ではないので無視 */ }
+  }
+
+  // ================= 画像追加 =================
   fileInput.addEventListener('change', async (e) => {
     const files = Array.from(e.target.files || []);
     for (const file of files) {
@@ -237,6 +359,7 @@
     }
     fileInput.value = '';
     render();
+    saveState();
   });
 
   function loadImageEl(url) {
@@ -269,6 +392,7 @@
     }
     statusMsg.textContent = '';
     render();
+    clearState();
   });
 
   function render() {
@@ -295,7 +419,7 @@
         <img class="thumb" src="${item.thumbSrc}" alt="">
         <span class="meta">
           <div class="name">${escapeHtml(item.file.name)}</div>
-          <div class="dim">${eff.width}×${eff.height}px${item.crop ? '' : ''}</div>
+          <div class="dim">${eff.width}×${eff.height}px</div>
           ${item.crop ? '<span class="cropped-tag">トリミング済み</span>' : ''}
         </span>
         <button class="iconbtn trim" data-role="trim" aria-label="トリミング">✂</button>
@@ -323,6 +447,7 @@
         if (target) revokeItem(target);
         items = items.filter((it) => it.id !== id);
         render();
+        saveState();
       });
     });
     list.querySelectorAll('[data-role="trim"]').forEach((btn) => {
@@ -391,6 +516,7 @@
     if (dragEl) dragEl.classList.remove('dragging');
     dragEl = null;
     dragId = null;
+    saveState();
   }
 
   // --- トリミングモーダル ---
@@ -486,6 +612,7 @@
     updateThumb(cropTarget);
     closeCropModal();
     render();
+    saveState();
   });
 
   cropCancel.addEventListener('click', () => {
@@ -502,6 +629,7 @@
     updateThumb(cropTarget);
     closeCropModal();
     render();
+    saveState();
   });
 
   function updateThumb(item) {
@@ -524,11 +652,30 @@
     item.thumbSrc = canvas.toDataURL();
   }
 
+  // ================= 出力形式(PNG/JPEG)の切り替え =================
+  function updateQualityVisibility() {
+    qualityField.style.display = formatSelect.value === 'image/jpeg' ? 'flex' : 'none';
+  }
+  function updateQualityLabel() {
+    qualityValue.textContent = qualityRange.value;
+  }
+  function extForFormat(fmt) {
+    return fmt === 'image/jpeg' ? 'jpg' : 'png';
+  }
+
+  formatSelect.addEventListener('change', () => {
+    updateQualityVisibility();
+    saveState();
+  });
+  qualityRange.addEventListener('input', updateQualityLabel);
+  qualityRange.addEventListener('change', saveState);
+
   // --- 画像結合 ---
   combineBtn.addEventListener('click', () => {
     if (items.length < 2) return;
     statusMsg.textContent = '結合中…';
     combineBtn.disabled = true;
+    shareBtn.style.display = 'none';
 
     try {
       const rects = items.map(effectiveRect);
@@ -550,17 +697,38 @@
         y += r.height;
       });
 
+      const format = formatSelect.value;
+      const quality = format === 'image/jpeg' ? Number(qualityRange.value) / 100 : undefined;
+
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         resultImg.src = url;
         downloadLink.href = url;
+
         const ts = new Date();
         const pad = (n) => String(n).padStart(2, '0');
-        downloadLink.download = `combined_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.png`;
+        const fileName = `combined_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.${extForFormat(format)}`;
+        downloadLink.download = fileName;
+
         resultBox.style.display = 'block';
         resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
         statusMsg.textContent = '完了しました';
-      }, 'image/png');
+
+        // Web Share APIで直接共有(対応環境のみボタンを表示)
+        try {
+          const shareFile = new File([blob], fileName, { type: format });
+          if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+            shareBtn.style.display = 'block';
+            shareBtn.onclick = () => {
+              navigator.share({ files: [shareFile], title: 'つなげてまとめ' }).catch(() => {});
+            };
+          } else {
+            shareBtn.style.display = 'none';
+          }
+        } catch (shareErr) {
+          shareBtn.style.display = 'none';
+        }
+      }, format, quality);
     } catch (err) {
       statusMsg.textContent = 'エラーが発生しました: ' + err.message;
     } finally {
@@ -568,7 +736,13 @@
     }
   });
 
-  render();
+  // --- 初期化(状態復元→描画) ---
+  (async function init() {
+    await loadState();
+    updateQualityVisibility();
+    updateQualityLabel();
+    render();
+  })();
 
   // --- PWA登録 ---
   if ('serviceWorker' in navigator) {
