@@ -31,202 +31,117 @@
     -webkit-tap-highlight-color:transparent;
     padding-bottom:96px;
   }
-  header{
-    padding:20px 20px 8px;
-  }
-  h1{
-    font-size:20px;
-    font-weight:700;
-    margin:0 0 2px;
-    letter-spacing:0.01em;
-  }
-  header p{
-    margin:0;
-    font-size:13px;
-    color:var(--muted);
-  }
-  main{
-    padding:12px 16px 24px;
-    max-width:520px;
-    margin:0 auto;
-  }
+  header{ padding:20px 20px 8px; }
+  h1{ font-size:20px; font-weight:700; margin:0 0 2px; letter-spacing:0.01em; }
+  header p{ margin:0; font-size:13px; color:var(--muted); }
+  main{ padding:12px 16px 24px; max-width:520px; margin:0 auto; }
   .picker{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    width:100%;
-    padding:14px;
-    margin-top:8px;
-    border:1.5px dashed var(--border);
-    border-radius:14px;
-    background:var(--surface);
-    color:var(--accent);
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:14px; margin-top:8px;
+    border:1.5px dashed var(--border); border-radius:14px;
+    background:var(--surface); color:var(--accent);
+    font-size:15px; font-weight:600; cursor:pointer;
   }
   .picker input{display:none;}
-  #list{
-    list-style:none;
-    margin:18px 0 0;
-    padding:0;
+  .clear-all{
+    width:100%; margin-top:8px;
   }
+  .clear-all:disabled{ opacity:0.4; cursor:not-allowed; }
+  #list{ list-style:none; margin:18px 0 0; padding:0; }
   .item{
-    position:relative;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:10px;
-    margin-bottom:0;
-    touch-action:pan-y;
+    position:relative; display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:10px; touch-action:pan-y;
   }
-  .item.dragging{
-    opacity:0.4;
-  }
-  .connector{
-    display:flex;
-    justify-content:center;
-    height:16px;
-  }
-  .connector::before{
-    content:"";
-    width:0;
-    border-left:2px dashed var(--border);
-  }
+  .item.dragging{ opacity:0.4; }
+  .connector{ display:flex; justify-content:center; height:16px; }
+  .connector::before{ content:""; width:0; border-left:2px dashed var(--border); }
   .badge{
-    flex:none;
-    width:24px;
-    height:24px;
-    border-radius:50%;
-    background:var(--accent);
-    color:var(--accent-ink);
-    font-size:12px;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    flex:none; width:24px; height:24px; border-radius:50%;
+    background:var(--accent); color:var(--accent-ink);
+    font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center;
   }
   .thumb{
-    flex:none;
-    width:52px;
-    height:52px;
-    border-radius:8px;
-    object-fit:cover;
-    background:#EEE;
-    border:1px solid var(--border);
+    flex:none; width:52px; height:52px; border-radius:8px;
+    object-fit:cover; background:#EEE; border:1px solid var(--border);
   }
-  .meta{
-    flex:1;
-    min-width:0;
+  .meta{ flex:1; min-width:0; }
+  .meta .name{ font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .meta .dim{ font-size:12px; color:var(--muted); }
+  .meta .cropped-tag{
+    display:inline-block; margin-top:2px; font-size:11px; font-weight:700;
+    color:var(--accent); background:#E7EAF9; padding:1px 6px; border-radius:6px;
   }
-  .meta .name{
-    font-size:13px;
-    font-weight:600;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+  .iconbtn{
+    flex:none; width:32px; height:32px; border-radius:50%;
+    border:none; background:transparent; color:var(--muted);
+    font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
   }
-  .meta .dim{
-    font-size:12px;
-    color:var(--muted);
-  }
-  .remove{
-    flex:none;
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    border:none;
-    background:transparent;
-    color:var(--muted);
-    font-size:18px;
-    line-height:1;
-    cursor:pointer;
-  }
+  .iconbtn.trim{ color:var(--accent); }
   .handle{
-    flex:none;
-    width:30px;
-    height:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--muted);
-    cursor:grab;
-    font-size:18px;
-    letter-spacing:2px;
-    touch-action:none;
+    flex:none; width:26px; height:40px; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); cursor:grab; font-size:18px; letter-spacing:2px; touch-action:none;
   }
-  .empty{
-    text-align:center;
-    color:var(--muted);
-    font-size:13px;
-    padding:28px 12px;
-  }
+  .empty{ text-align:center; color:var(--muted); font-size:13px; padding:28px 12px; }
   .bottombar{
-    position:fixed;
-    left:0;right:0;bottom:0;
+    position:fixed; left:0;right:0;bottom:0;
     padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     background:linear-gradient(to top, var(--bg) 60%, transparent);
   }
-  .bottombar-inner{
-    max-width:520px;
-    margin:0 auto;
-    display:flex;
-    gap:10px;
-  }
+  .bottombar-inner{ max-width:520px; margin:0 auto; display:flex; gap:10px; }
   button.primary{
-    flex:1;
-    padding:14px;
-    border:none;
-    border-radius:14px;
-    background:var(--accent);
-    color:var(--accent-ink);
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
+    flex:1; padding:14px; border:none; border-radius:14px;
+    background:var(--accent); color:var(--accent-ink);
+    font-size:15px; font-weight:700; cursor:pointer;
   }
-  button.primary:disabled{
-    background:#9AA5C0;
-    cursor:not-allowed;
+  button.primary.small{ flex:none; padding:10px 18px; font-size:14px; }
+  button.primary:disabled{ background:#9AA5C0; cursor:not-allowed; }
+  button.ghost{
+    padding:10px 16px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--ink); font-size:14px; font-weight:600; cursor:pointer;
   }
-  .result{
-    margin-top:22px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:14px;
-  }
-  .result h2{
-    font-size:14px;
-    margin:0 0 10px;
-  }
-  .result img{
-    width:100%;
-    display:block;
-    border-radius:8px;
-    border:1px solid var(--border);
-  }
+  .result{ margin-top:22px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; }
+  .result h2{ font-size:14px; margin:0 0 10px; }
+  .result img{ width:100%; display:block; border-radius:8px; border:1px solid var(--border); }
   a.download{
-    display:block;
-    text-align:center;
-    margin-top:12px;
-    padding:12px;
-    border-radius:12px;
-    background:var(--success);
-    color:#fff;
-    font-weight:700;
-    text-decoration:none;
-    font-size:14px;
+    display:block; text-align:center; margin-top:12px; padding:12px; border-radius:12px;
+    background:var(--success); color:#fff; font-weight:700; text-decoration:none; font-size:14px;
   }
-  .status{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:6px;
-    min-height:16px;
+  .status{ font-size:12px; color:var(--muted); margin-top:6px; min-height:16px; }
+
+  /* --- トリミングモーダル --- */
+  .crop-modal{
+    display:none; position:fixed; inset:0; background:rgba(10,12,16,0.9);
+    z-index:1000; align-items:center; justify-content:center; flex-direction:column;
+    padding:16px; gap:14px;
   }
+  .crop-modal.open{ display:flex; }
+  .crop-stage{
+    position:relative; display:inline-block; max-width:92vw; max-height:64vh;
+    touch-action:none; line-height:0;
+  }
+  .crop-stage img{
+    display:block; max-width:92vw; max-height:64vh; width:auto; height:auto;
+    user-select:none; -webkit-user-drag:none;
+  }
+  .crop-rect{
+    position:absolute; border:2px solid #fff;
+    box-shadow:0 0 0 9999px rgba(0,0,0,0.55);
+    touch-action:none; cursor:move;
+  }
+  .crop-handle{
+    position:absolute; width:22px; height:22px; margin:-11px;
+    background:#fff; border:2px solid var(--accent); border-radius:50%;
+    touch-action:none;
+  }
+  .crop-handle.nw{ top:0; left:0; cursor:nwse-resize; }
+  .crop-handle.ne{ top:0; left:100%; cursor:nesw-resize; }
+  .crop-handle.sw{ top:100%; left:0; cursor:nesw-resize; }
+  .crop-handle.se{ top:100%; left:100%; cursor:nwse-resize; }
+  .crop-actions{ display:flex; gap:10px; width:100%; max-width:400px; }
+  .crop-actions .ghost{ flex:1; }
+  .crop-actions .primary.small{ flex:1; }
+  .crop-hint{ color:#D7DCE1; font-size:12px; text-align:center; }
 </style>
 </head>
 <body>
@@ -240,6 +155,7 @@
     画像を選ぶ(複数選択可)
     <input id="fileInput" type="file" accept="image/*" multiple>
   </label>
+  <button id="clearAllBtn" class="ghost clear-all" disabled>オールクリア</button>
 
   <ul id="list"></ul>
   <p id="emptyMsg" class="empty">まだ画像がありません。上のボタンから追加してください。</p>
@@ -258,9 +174,29 @@
   <div class="status" id="statusMsg" style="text-align:center;"></div>
 </div>
 
+<!-- トリミングモーダル -->
+<div id="cropModal" class="crop-modal">
+  <div class="crop-stage" id="cropStage">
+    <img id="cropImg" src="" alt="">
+    <div id="cropRect" class="crop-rect">
+      <div class="crop-handle nw" data-handle="nw"></div>
+      <div class="crop-handle ne" data-handle="ne"></div>
+      <div class="crop-handle sw" data-handle="sw"></div>
+      <div class="crop-handle se" data-handle="se"></div>
+    </div>
+  </div>
+  <p class="crop-hint">四隅をドラッグして範囲を調整、枠の内側をドラッグして移動できます</p>
+  <div class="crop-actions">
+    <button id="cropReset" class="ghost">全体に戻す</button>
+    <button id="cropCancel" class="ghost">キャンセル</button>
+    <button id="cropApply" class="primary small">この範囲で決定</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const fileInput = document.getElementById('fileInput');
+  const clearAllBtn = document.getElementById('clearAllBtn');
   const list = document.getElementById('list');
   const emptyMsg = document.getElementById('emptyMsg');
   const combineBtn = document.getElementById('combineBtn');
@@ -269,7 +205,17 @@
   const downloadLink = document.getElementById('downloadLink');
   const statusMsg = document.getElementById('statusMsg');
 
-  /** @type {{id:number, file:File, url:string, width:number, height:number}[]} */
+  const cropModal = document.getElementById('cropModal');
+  const cropStage = document.getElementById('cropStage');
+  const cropImg = document.getElementById('cropImg');
+  const cropRectEl = document.getElementById('cropRect');
+  const cropReset = document.getElementById('cropReset');
+  const cropCancel = document.getElementById('cropCancel');
+  const cropApply = document.getElementById('cropApply');
+
+  /**
+   * item: { id, file, url, imgEl, naturalWidth, naturalHeight, crop: null | {x,y,width,height}, thumbSrc }
+   */
   let items = [];
   let nextId = 1;
 
@@ -277,26 +223,59 @@
     const files = Array.from(e.target.files || []);
     for (const file of files) {
       const url = URL.createObjectURL(file);
-      const dim = await loadDimensions(url);
-      items.push({ id: nextId++, file, url, width: dim.width, height: dim.height });
+      const imgEl = await loadImageEl(url);
+      items.push({
+        id: nextId++,
+        file,
+        url,
+        imgEl,
+        naturalWidth: imgEl.naturalWidth,
+        naturalHeight: imgEl.naturalHeight,
+        crop: null,
+        thumbSrc: url
+      });
     }
     fileInput.value = '';
     render();
   });
 
-  function loadDimensions(url) {
-    return new Promise((resolve) => {
+  function loadImageEl(url) {
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-      img.onerror = () => resolve({ width: 0, height: 0 });
+      img.onload = () => resolve(img);
+      img.onerror = reject;
       img.src = url;
     });
   }
+
+  function effectiveRect(item) {
+    return item.crop || { x: 0, y: 0, width: item.naturalWidth, height: item.naturalHeight };
+  }
+
+  function revokeItem(item) {
+    try { URL.revokeObjectURL(item.url); } catch (e) { /* 何もしない */ }
+  }
+
+  clearAllBtn.addEventListener('click', () => {
+    if (items.length === 0) return;
+    const ok = window.confirm('すべての画像を削除します。よろしいですか?');
+    if (!ok) return;
+    items.forEach(revokeItem);
+    items = [];
+    resultBox.style.display = 'none';
+    if (resultImg.src) {
+      try { URL.revokeObjectURL(resultImg.src); } catch (e) { /* 何もしない */ }
+      resultImg.src = '';
+    }
+    statusMsg.textContent = '';
+    render();
+  });
 
   function render() {
     list.innerHTML = '';
     emptyMsg.style.display = items.length ? 'none' : 'block';
     combineBtn.disabled = items.length < 2;
+    clearAllBtn.disabled = items.length === 0;
 
     items.forEach((item, index) => {
       if (index > 0) {
@@ -305,6 +284,7 @@
         connector.setAttribute('aria-hidden', 'true');
         list.appendChild(connector);
       }
+      const eff = effectiveRect(item);
       const li = document.createElement('li');
       li.className = 'item';
       li.dataset.id = item.id;
@@ -312,18 +292,20 @@
       li.innerHTML = `
         <span class="handle" data-role="handle">⠿</span>
         <span class="badge">${index + 1}</span>
-        <img class="thumb" src="${item.url}" alt="">
+        <img class="thumb" src="${item.thumbSrc}" alt="">
         <span class="meta">
           <div class="name">${escapeHtml(item.file.name)}</div>
-          <div class="dim">${item.width}×${item.height}px</div>
+          <div class="dim">${eff.width}×${eff.height}px${item.crop ? '' : ''}</div>
+          ${item.crop ? '<span class="cropped-tag">トリミング済み</span>' : ''}
         </span>
-        <button class="remove" data-role="remove" aria-label="削除">✕</button>
+        <button class="iconbtn trim" data-role="trim" aria-label="トリミング">✂</button>
+        <button class="iconbtn" data-role="remove" aria-label="削除">✕</button>
       `;
       list.appendChild(li);
     });
 
     attachDrag();
-    attachRemove();
+    attachButtons();
   }
 
   function escapeHtml(str) {
@@ -332,13 +314,23 @@
     return div.innerHTML;
   }
 
-  function attachRemove() {
+  function attachButtons() {
     list.querySelectorAll('[data-role="remove"]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const li = btn.closest('.item');
         const id = Number(li.dataset.id);
+        const target = items.find((it) => it.id === id);
+        if (target) revokeItem(target);
         items = items.filter((it) => it.id !== id);
         render();
+      });
+    });
+    list.querySelectorAll('[data-role="trim"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const li = btn.closest('.item');
+        const id = Number(li.dataset.id);
+        const item = items.find((it) => it.id === id);
+        if (item) openCropModal(item);
       });
     });
   }
@@ -346,7 +338,6 @@
   // --- ポインタ操作によるドラッグ並び替え(マウス・タッチ両対応) ---
   let dragEl = null;
   let dragId = null;
-  let placeholderIndex = null;
 
   function attachDrag() {
     list.querySelectorAll('[data-role="handle"]').forEach((handle) => {
@@ -361,7 +352,6 @@
     dragEl = li;
     dragId = Number(li.dataset.id);
     dragEl.classList.add('dragging');
-    dragEl.setPointerCapture && e.target.setPointerCapture(e.pointerId);
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp, { once: true });
@@ -388,7 +378,6 @@
       const [moved] = items.splice(currentIndex, 1);
       items.splice(targetIndex, 0, moved);
       render();
-      // 再描画後、ドラッグ状態を復元
       const newEl = list.querySelector(`.item[data-id="${dragId}"]`);
       if (newEl) {
         dragEl = newEl;
@@ -404,16 +393,147 @@
     dragId = null;
   }
 
+  // --- トリミングモーダル ---
+  let cropTarget = null;
+  let cropScale = 1;
+  let cropDispW = 0, cropDispH = 0;
+  let rect = { x: 0, y: 0, w: 0, h: 0 };
+  let dragMode = null; // 'move' | 'nw' | 'ne' | 'sw' | 'se'
+  let dragStart = null;
+
+  function openCropModal(item) {
+    cropTarget = item;
+    cropImg.src = item.url;
+    cropModal.classList.add('open');
+
+    requestAnimationFrame(() => {
+      const box = cropImg.getBoundingClientRect();
+      cropDispW = box.width;
+      cropDispH = box.height;
+      cropScale = cropDispW / item.naturalWidth;
+
+      const eff = effectiveRect(item);
+      rect = {
+        x: eff.x * cropScale,
+        y: eff.y * cropScale,
+        w: eff.width * cropScale,
+        h: eff.height * cropScale
+      };
+      drawRect();
+    });
+  }
+
+  function closeCropModal() {
+    cropModal.classList.remove('open');
+    cropTarget = null;
+  }
+
+  function drawRect() {
+    cropRectEl.style.left = rect.x + 'px';
+    cropRectEl.style.top = rect.y + 'px';
+    cropRectEl.style.width = rect.w + 'px';
+    cropRectEl.style.height = rect.h + 'px';
+  }
+
+  cropRectEl.addEventListener('pointerdown', (e) => {
+    const handle = e.target.dataset.handle;
+    dragMode = handle || 'move';
+    dragStart = { x: e.clientX, y: e.clientY, rect: { ...rect } };
+    e.preventDefault();
+    window.addEventListener('pointermove', onCropMove);
+    window.addEventListener('pointerup', onCropUp, { once: true });
+  });
+
+  function onCropMove(e) {
+    if (!dragMode || !dragStart) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    const MIN = 24;
+    let { x, y, w, h } = dragStart.rect;
+
+    if (dragMode === 'move') {
+      x = clamp(dragStart.rect.x + dx, 0, cropDispW - dragStart.rect.w);
+      y = clamp(dragStart.rect.y + dy, 0, cropDispH - dragStart.rect.h);
+    } else {
+      let left = dragStart.rect.x, top = dragStart.rect.y;
+      let right = dragStart.rect.x + dragStart.rect.w, bottom = dragStart.rect.y + dragStart.rect.h;
+
+      if (dragMode.includes('w')) left = clamp(dragStart.rect.x + dx, 0, right - MIN);
+      if (dragMode.includes('e')) right = clamp(right + dx, left + MIN, cropDispW);
+      if (dragMode.includes('n')) top = clamp(dragStart.rect.y + dy, 0, bottom - MIN);
+      if (dragMode.includes('s')) bottom = clamp(bottom + dy, top + MIN, cropDispH);
+
+      x = left; y = top; w = right - left; h = bottom - top;
+    }
+
+    rect = { x, y, w, h };
+    drawRect();
+  }
+
+  function onCropUp() {
+    window.removeEventListener('pointermove', onCropMove);
+    dragMode = null;
+    dragStart = null;
+  }
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  cropReset.addEventListener('click', () => {
+    if (!cropTarget) return;
+    cropTarget.crop = null;
+    updateThumb(cropTarget);
+    closeCropModal();
+    render();
+  });
+
+  cropCancel.addEventListener('click', () => {
+    closeCropModal();
+  });
+
+  cropApply.addEventListener('click', () => {
+    if (!cropTarget) return;
+    const natX = Math.round(rect.x / cropScale);
+    const natY = Math.round(rect.y / cropScale);
+    const natW = Math.round(rect.w / cropScale);
+    const natH = Math.round(rect.h / cropScale);
+    cropTarget.crop = { x: natX, y: natY, width: natW, height: natH };
+    updateThumb(cropTarget);
+    closeCropModal();
+    render();
+  });
+
+  function updateThumb(item) {
+    const eff = effectiveRect(item);
+    if (!item.crop) {
+      item.thumbSrc = item.url;
+      return;
+    }
+    const size = 104;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const scale = Math.max(size / eff.width, size / eff.height);
+    const drawW = eff.width * scale;
+    const drawH = eff.height * scale;
+    const dx = (size - drawW) / 2;
+    const dy = (size - drawH) / 2;
+    ctx.drawImage(item.imgEl, eff.x, eff.y, eff.width, eff.height, dx, dy, drawW, drawH);
+    item.thumbSrc = canvas.toDataURL();
+  }
+
   // --- 画像結合 ---
-  combineBtn.addEventListener('click', async () => {
+  combineBtn.addEventListener('click', () => {
     if (items.length < 2) return;
     statusMsg.textContent = '結合中…';
     combineBtn.disabled = true;
 
     try {
-      const imgs = await Promise.all(items.map((it) => loadImageEl(it.url)));
-      const maxWidth = Math.max(...imgs.map((img) => img.naturalWidth));
-      const totalHeight = imgs.reduce((sum, img) => sum + img.naturalHeight, 0);
+      const rects = items.map(effectiveRect);
+      const maxWidth = Math.max(...rects.map((r) => r.width));
+      const totalHeight = rects.reduce((sum, r) => sum + r.height, 0);
 
       const canvas = document.createElement('canvas');
       canvas.width = maxWidth;
@@ -423,11 +543,12 @@
       ctx.fillRect(0, 0, maxWidth, totalHeight);
 
       let y = 0;
-      for (const img of imgs) {
-        const x = Math.round((maxWidth - img.naturalWidth) / 2);
-        ctx.drawImage(img, x, y);
-        y += img.naturalHeight;
-      }
+      items.forEach((item, idx) => {
+        const r = rects[idx];
+        const x = Math.round((maxWidth - r.width) / 2);
+        ctx.drawImage(item.imgEl, r.x, r.y, r.width, r.height, x, y, r.width, r.height);
+        y += r.height;
+      });
 
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
@@ -446,15 +567,6 @@
       combineBtn.disabled = items.length < 2;
     }
   });
-
-  function loadImageEl(url) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = url;
-    });
-  }
 
   render();
 
