@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsunagete-matome-v1';
+const CACHE_NAME = 'tsunagete-matome-v1.1';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
